@@ -1,10 +1,10 @@
 from .models import Calculation
-from django.forms import ModelForm, NumberInput
+from django.forms import ModelForm, NumberInput, TextInput
 
 class CalculationForm(ModelForm):
     class Meta:
         model = Calculation
-        fields = {'area', 'tempNow', 'tempNeed'}
+        fields = {'area', 'tempNow', 'tempNeed', 'city'}
 
         widgets = {
             'area': NumberInput(attrs={
@@ -18,5 +18,9 @@ class CalculationForm(ModelForm):
             'tempNeed': NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'TempNeed'
+            }),
+            'city': TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'City'
             })
         }

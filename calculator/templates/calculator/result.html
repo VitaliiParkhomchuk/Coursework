@@ -4,32 +4,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test</title>
+    <title>Heating</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'main/css/main.css' %}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link rel="icon" type="image/png" href="{% static 'main/img/Logo.ico' %}">
 </head>
 <body>
     <aside>
-        <img src="" alt="">
-        <span class="logo">Heating</span>
-        <h3>Menu</h3>
+        <img src="{% static 'main/img/Logo.png' %}" alt="">
+        <span class="logo">Heating</span><br>
+        <span class="logoDowm">System</span>
+        <br>
+        <h3>Меню</h3>
         <ul>
             <a href="{% url 'home' %}"><li><i class="fas fa-home"></i>Головна</li></a>
             <a href="{% url 'about' %}"><li><i class="fas fa-address-card"></i>Про нас</li></a>
-            <a href="{% url 'calculator' %}"><li><i class="fas fa-paper-plane">Калькулятор</i></li></a>
-            <a href=""><li><i class="fas fa-paper-plane">Контакти</i></li></a>
+            <a href="{% url 'calculator' %}"><li><i class="fas fa-paper-plane"></i>Калькулятор</li></a>
+            <a href=""><li><i class="fas fa-paper-plane"></i>Контакти</li></a>
         </ul>
     </aside>
     <main>
         <div class="features">
-            <h1>Main page</h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde, vitae!</p>
-            <h1>{{ temp }}</h1>
-            <a href="{% url 'calculation' %}"><button class="btn btn-info"><i class="fas fa-plus-circle"></i>Калькулятор</button></a>
+            <h1>Температура в вашому місті</h1>
             <br>
-            {{ data.res }}
+            <div class="resultTable">
+                <table>
+                    <tr>
+                        {% for time, temperature in data.weatherForecast %}
+                            {% if time < 10 %}
+                                <td>0{{ time }}:00</td>
+                            {% else %}
+                                <td>{{ time }}:00</td>
+                            {% endif %}                                                        
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><img src="{% static 'main/img/cloudy-night_5538985.png' %}" alt=""></td>
+                        {% for time, temperature in data.weatherForecast|slice:":-1" %}
+                            {% if time < 3 or time > 17 %}
+                                <td><img src="{% static 'main/img/cloudy-night_5538985.png' %}" alt=""></td>
+                            {% elif time < 9 %}
+                                <td><img src="{% static 'main/img/sunrise_1163663.png' %}" alt=""></td>                                
+                            {% else %}
+                                <td><img src="{% static 'main/img/sun_869869.png' %}" alt=""></td>
+                            {% endif %}    
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for time, temperature in data.weatherForecast %}
+                            <td>t {{ temperature }}°</td>
+                        {% endfor %}
+                    </tr>
+                </table>
+            </div>
         </div>
     </main>
+    <footer>
+        <table>
+            <tr>
+                <td><h4>Ми в соц-мережах:</h4></td>
+                <td><h4>Контакти:</h4></td>
+            </tr>
+            <tr>
+                <td class="td_footer"><a href="https://www.instagram.com/nuwee_official/" target="_blank"><img src="{% static 'main/img/Instagram.png' %}" alt=""><h5>Instagram</h5></a></td>
+                <td class="td_footer"><a href="tel:+123456789"><img src="{% static 'main/img/PhoneNumber.png' %}" alt="" style="width: 25px; height: 25px; margin-left: -2px;"><h5>Phone number</h5></a></td>
+            </tr>
+            <tr>
+                <td class="td_footer"><a href="https://t.me/s/nuwee_official?q=%23%D0%BD%D0%BE%D0%B2%D0%B8%D0%BD%D0%B8%D0%9D%D0%A3%D0%92%D0%93%D0%9F" target="_blank"><img src="{% static 'main/img/Telegram.png' %}" alt=""><h5>Telegram</h5></td>
+                <td class="td_footer"><a href="https://nuwm.edu.ua/university/kontakti" target="_blank"><img src="{% static 'main/img/Email.png' %}" alt="" style="width: 25px; height: 25px; margin-left: -2px;"><h5>Email</h5></a></td>
+            </tr>
+            <tr>
+                <td class="td_footer"><a href="https://www.facebook.com/www.nuwm.edu.ua/?locale=uk_UA" target="_blank"><img src="{% static 'main/img/Facebook.png' %}" alt="" style="margin-bottom: 10px;"><h5>Facebook</h5></a></td>
+                <td class="td_footer"><a href="https://www.google.com/maps/place/%D0%9D%D0%B0%D1%86%D1%96%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D0%B8%D0%B9+%D1%83%D0%BD%D1%96%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D1%82%D0%B5%D1%82+%D0%B2%D0%BE%D0%B4%D0%BD%D0%BE%D0%B3%D0%BE+%D0%B3%D0%BE%D1%81%D0%BF%D0%BE%D0%B4%D0%B0%D1%80%D1%81%D1%82%D0%B2%D0%B0+%D1%82%D0%B0+%D0%BF%D1%80%D0%B8%D1%80%D0%BE%D0%B4%D0%BE%D0%BA%D0%BE%D1%80%D0%B8%D1%81%D1%82%D1%83%D0%B2%D0%B0%D0%BD%D0%BD%D1%8F/@50.6179511,26.2586565,15z/data=!4m2!3m1!1s0x0:0x4d65c704c32f0238?sa=X&ved=1t:2428&ictx=111" target="_blank"><img src="{% static 'main/img/Address.png' %}" alt="" style="width: 15px; margin-left: 3px;"><h5>Address</h5></a></td>
+            </tr>
+        </table>
+        <img src="{% static 'main/img/nuwmLogoUK.png'%}" alt="" class="logo">
+    </footer>
 </body>
 </html>
