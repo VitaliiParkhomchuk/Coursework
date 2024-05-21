@@ -21,7 +21,7 @@
         <ul>
             <a href="{% url 'home' %}"><li><i class="fas fa-home"></i>Головна</li></a>
             <a href="{% url 'about' %}"><li><i class="fas fa-address-card"></i>Про нас</li></a>
-            <a href="{% url 'calculator' %}"><li><i class="fas fa-paper-plane"></i>Калькулятор</li></a>
+            <a href="{% url 'calculation' %}"><li><i class="fas fa-paper-plane"></i>Калькулятор</li></a>
             <a href="https://github.com/VitaliiParkhomchuk/Coursework"><li style="margin-top: 25px; margin-right: 40px; margin-right: 100;"><img src="{% static 'main/img/pngfind.com-github-logo-png-405209.png' %}" alt="" style="width: 25px; height: 20px; margin-bottom: 5px; margin-top: 0; margin-top: 5px; margin-left: 0;"></i>GitHub</li></a>
         </ul>
     </aside>
@@ -105,52 +105,65 @@
 </body>
 <script>
     const colors = {
-    purple: {
-        default: "rgba(149, 76, 233, 1)",
-        half: "rgba(149, 76, 233, 0.5)",
-        quarter: "rgba(149, 76, 233, 0.25)",
-        zero: "rgba(149, 76, 233, 0)"
-    },
-    indigo: {
-        default: "rgba(80, 102, 120, 1)",
-        quarter: "rgba(80, 102, 120, 0.25)"
-    }
+        purple: {
+            default: "rgba(149, 76, 233, 1)",
+            half: "rgba(149, 76, 233, 0.5)",
+            quarter: "rgba(149, 76, 233, 0.25)",
+            zero: "rgba(149, 76, 233, 0)"
+        },
+        indigo: {
+            default: "rgba(80, 102, 120, 1)",
+            quarter: "rgba(80, 102, 120, 0.25)"
+        },
+        blue: {
+            default: "rgba(213, 132, 33, 1)",
+            half: "rgba(213, 132, 33, 0.5)",
+            quarter: "rgba(213, 132, 33, 0.25)",
+            zero: "rgba(213, 132, 33, 0)"
+        }
     };
 
     // Масив для годин
     var labels = [];
-    // Масив для температур
+    // Масиви для температур
     var weight = [];
+    var weight2 = [];
 
-    function loadJSON(callback) {   
+    function loadJSON(url, callback) {   
         var xobj = new XMLHttpRequest();
-            xobj.overrideMimeType("application/json");
-            xobj.open('GET', "{% static 'calculator/json/heating.json' %}", true);
-            xobj.onreadystatechange = function () {
-                if (xobj.readyState == 4 && xobj.status == 200) {
-                    // Обробка даних при успішному отриманні
-                    var data = JSON.parse(xobj.responseText);
-                    // Розділення даних на години і температури
-                    for (var i = 0; i < data.length; i += 2) {
-                        var hour = data[i].toString().padStart(2, '0'); // Форматуємо години
-                        labels.push(hour + ":00"); // Додаємо години до масиву labels у форматі "hh:00"
-                        weight.push(data[i + 1]);
-                    }
-                    // Побудова графіка
-                    buildChart();
-                }
-            };
-            xobj.send(null);  
+        xobj.overrideMimeType("application/json");
+        xobj.open('GET', url, true);
+        xobj.onreadystatechange = function () {
+            if (xobj.readyState == 4 && xobj.status == 200) {
+                callback(JSON.parse(xobj.responseText));
+            }
+        };
+        xobj.send(null);  
+    }
+
+    function processData(data, labelsArray, weightArray, addLabels) {
+        for (var i = 0; i < data.length; i += 2) {
+            if (addLabels) {
+                var hour = data[i].toString().padStart(2, '0'); // Форматуємо години
+                labelsArray.push(hour + ":00"); // Додаємо години до масиву labels у форматі "hh:00"
+            }
+            weightArray.push(data[i + 1]);
         }
+    }
 
     function buildChart() {
         const ctx = document.getElementById("canvas").getContext("2d");
         ctx.canvas.height = 100;
 
-        gradient = ctx.createLinearGradient(0, 25, 0, 300);
-        gradient.addColorStop(0, colors.purple.half);
-        gradient.addColorStop(0.35, colors.purple.quarter);
-        gradient.addColorStop(1, colors.purple.zero);
+        const gradient1 = ctx.createLinearGradient(0, 25, 0, 300);
+        gradient1.addColorStop(0, colors.purple.half);
+        gradient1.addColorStop(0.35, colors.purple.quarter);
+        gradient1.addColorStop(1, colors.purple.zero);
+
+        const gradient2 = ctx.createLinearGradient(0, 25, 0, 300);
+        gradient2.addColorStop(0, colors.blue.half);
+        gradient2.addColorStop(0.35, colors.blue.quarter);
+        gradient2.addColorStop(1, colors.blue.zero);
 
         const options = {
             type: "line",
@@ -158,12 +171,23 @@
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Temperature°',
+                        label: 'Temperature of heating°',
                         fill: true,
-                        backgroundColor: gradient,
+                        backgroundColor: gradient1,
                         pointBackgroundColor: colors.purple.default,
                         borderColor: colors.purple.default,
                         data: weight,
+                        lineTension: 0.4,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Temperature outside°',
+                        fill: true,
+                        backgroundColor: gradient2,
+                        pointBackgroundColor: colors.blue.default,
+                        borderColor: colors.blue.default,
+                        data: weight2,
                         lineTension: 0.4,
                         borderWidth: 2,
                         pointRadius: 3
@@ -172,14 +196,20 @@
             },
         };
 
-        // Побудова графіка
-        window.myLine = new Chart(ctx, options);
-        Chart.defaults.global.defaultFontFamily = "Fira Sans";
+        new Chart(ctx, options);
+    }
+
+    function initCharts() {
+        loadJSON("{% static 'calculator/json/heating.json' %}", function(data) {
+            processData(data, labels, weight, true);
+            loadJSON("{% static 'calculator/json/forecast.json' %}", function(data) {
+                processData(data, labels, weight2, false);
+                buildChart();
+            });
+        });
     }
 
     // Виклик функції для завантаження даних
-    loadJSON();
-
-
-  </script>  
+    initCharts();
+</script>   
 </html>

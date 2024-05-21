@@ -51,13 +51,18 @@ def result(request):
     city = str(obj.city)
     weatherForecast = get_weather_time_temperature(city)
 
-
+    
     heating = [item for sublist in weatherForecast for item in sublist]
+
+
+    forecast_json = json.dumps(heating)
+    with open('calculator/static/calculator/json/forecast.json', 'w') as f:
+        f.write(forecast_json)               
+
     tempInside = obj.tempNow
     for item in range(1, len(heating), 2):
-        heating[item] = round((100 - heating[item] + 100 - tempInside + 100 - obj.tempNeed) * 0.08 + obj.area * 0.03, 1)
-        tempInside = heating[item]
-
+            heating[item] = round((130 - heating[item] * 4 - tempInside + obj.tempNeed) * 0.15 + obj.area * 0.03, 1)
+            tempInside = heating[item]
 
     heating_json = json.dumps(heating)
     with open('calculator/static/calculator/json/heating.json', 'w') as f:
